@@ -13,21 +13,28 @@
 <div id="loginScreen">
   <h1>🍞 Brotify</h1>
 
-  <input id="groupNameInput" placeholder="Gruppenname">
-  <input id="userName" placeholder="Dein Name">
-  <button id="createGroupBtn">➕ Gruppe erstellen</button>
+  <input id="loginUser" placeholder="Benutzername">
+  <input id="loginPass" type="password" placeholder="Passwort">
+
+  <button id="loginBtn">🔐 Anmelden</button>
+  <button id="registerBtn">🆕 Neu registrieren</button>
 
   <hr>
 
+  <input id="groupNameInput" placeholder="Gruppenname (neu)">
+  <button id="createGroupBtn">➕ Gruppe erstellen</button>
+
   <input id="joinCode" placeholder="Einladungscode">
-  <input id="joinName" placeholder="Dein Name">
   <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
 </div>
 
 <!-- APP -->
 <div id="appScreen" class="hidden">
 
-  <!-- 🔴 NEU: Gruppe verlassen -->
+  <button id="logoutBtn" style="width:100%;margin-bottom:10px;">
+    🚪 Logout
+  </button>
+
   <button id="leaveGroupBtn" style="width:100%;margin-bottom:10px;">
     🚪 Gruppe verlassen
   </button>
@@ -44,7 +51,7 @@
     <p id="groupCode"></p>
   </div>
 
-  <input id="family" placeholder="Dein Name">
+  <input id="family" placeholder="Dein Name" disabled>
   <div id="pickupInline" class="pickup-under">🚗💨 kein Abholer</div>
 
   <div id="iconPicker"></div>

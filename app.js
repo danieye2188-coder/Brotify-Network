@@ -47,7 +47,7 @@ const pickupInline = document.getElementById("pickupInline");
 const pickupInput = document.getElementById("pickupInput");
 const saveBtn = document.getElementById("saveBtn");
 
-/******** LOGIN ********/
+/******** LOGIN / GRUPPEN (ERGÄNZUNG) ********/
 createGroupBtn.onclick = () => {
   const groupName = groupNameInput.value.trim();
   const userNameVal = userName.value.trim();
@@ -56,7 +56,7 @@ createGroupBtn.onclick = () => {
   const ref = db.ref("groups").push();
   currentGroup = ref.key.substring(0, 8).toUpperCase();
 
-  db.ref("groups/" + currentGroup).set({ name: groupName });
+  db.ref("groups/" + currentGroup).set({ name: groupName, created: Date.now() });
 
   saveSession(groupName, userNameVal);
   enterGroup(groupName, userNameVal);
@@ -75,7 +75,7 @@ joinGroupBtn.onclick = () => {
   });
 };
 
-/******** SESSION ********/
+/******** SESSION (NUR MERKEN) ********/
 function saveSession(groupName, userName) {
   localStorage.setItem("brotifyGroup", currentGroup);
   localStorage.setItem("brotifyGroupName", groupName);
@@ -99,19 +99,20 @@ leaveGroupBtn.onclick = () => {
   location.reload();
 };
 
-/******** ENTER ********/
+/******** ENTER GROUP ********/
 function enterGroup(groupName, userNameVal) {
-  groupTitle.textContent = groupName;
-  groupCode.textContent = "🔑 Einladungscode: " + currentGroup;
-  nameInput.value = userNameVal;
+  document.getElementById("groupTitle").textContent = groupName;
+  document.getElementById("groupCode").textContent =
+    "🔑 Einladungscode: " + currentGroup;
 
+  nameInput.value = userNameVal;
   loginScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
 
   initApp();
 }
 
-/******** ICON PICKER ********/
+/******** ICON PICKER (ORIGINAL) ********/
 function renderIcons(active = selectedIcon) {
   const picker = document.getElementById("iconPicker");
   picker.innerHTML = "";
@@ -127,7 +128,7 @@ function renderIcons(active = selectedIcon) {
   });
 }
 
-/******** PRODUKTE ********/
+/******** PRODUKTE (EXAKT WIE FRÜHER) ********/
 function renderProducts(items = {}) {
   productsEl.innerHTML = "";
   cart = {};
@@ -170,13 +171,14 @@ function renderProducts(items = {}) {
         amt.textContent = cart[p];
       };
 
+      /* ⬅⬅⬅ WICHTIG: ORIGINAL-REIHENFOLGE */
       row.append(name, minus, amt, plus);
       productsEl.appendChild(row);
     });
   }
 }
 
-/******** SPEICHERN ********/
+/******** SPEICHERN (ORIGINAL) ********/
 saveBtn.onclick = () => {
   const name = nameInput.value.trim();
   if (!name) return alert("Bitte deinen Namen eingeben");
@@ -190,7 +192,9 @@ saveBtn.onclick = () => {
   };
 
   const ref = db.ref(`groups/${currentGroup}/orders`);
-  editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
+  editOrderId
+    ? ref.child(editOrderId).set(data)
+    : ref.push(data);
 
   editOrderId = null;
   saveBtn.textContent = "🛒 Bestellung speichern";
@@ -200,7 +204,7 @@ saveBtn.onclick = () => {
   renderProducts();
 };
 
-/******** LIVE – BESTELLUNGEN (ORIGINAL-DARSTELLUNG) ********/
+/******** LIVE (ORIGINALDARSTELLUNG) ********/
 function initApp() {
   renderIcons();
   renderProducts();
@@ -217,7 +221,6 @@ function initApp() {
 
       const box = document.createElement("div");
       box.className = "overview-box";
-
       box.innerHTML = `${d.icon} <b>${d.name}</b>`;
 
       if (d.remark) {
@@ -285,7 +288,7 @@ function initApp() {
   });
 }
 
-/******** ABHOLER ********/
+/******** ABHOLER (ORIGINAL) ********/
 document.getElementById("savePickup").onclick = () => {
   const v = pickupInput.value.trim();
   if (v) db.ref(`groups/${currentGroup}/meta/abholer`).set(v);

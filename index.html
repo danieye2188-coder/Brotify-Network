@@ -4,40 +4,60 @@
   <meta charset="UTF-8">
   <title>Brotify 🍞</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- STYLE -->
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- LOGIN (IMMER SICHTBAR BEIM START) -->
+<!-- LOGIN -->
 <div id="loginScreen">
-  <h1>Brotify</h1>
+  <h1>🍞 Brotify</h1>
 
-  <input id="loginUser" placeholder="Benutzername">
-  <input id="loginPass" type="password" placeholder="Passwort">
+  <input id="groupNameInput" placeholder="Gruppenname">
+  <input id="userName" placeholder="Dein Name">
+  <button id="createGroupBtn">➕ Gruppe erstellen</button>
 
-  <button id="loginBtn">Anmelden</button>
-  <button id="registerBtn">Registrieren</button>
+  <hr>
+
+  <input id="joinCode" placeholder="Einladungscode">
+  <input id="joinName" placeholder="Dein Name">
+  <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
 </div>
 
-<!-- APP (IMMER VERSTECKT BEIM START) -->
+<!-- APP -->
 <div id="appScreen" class="hidden">
 
-  <div class="header-moon">
-    <h1 id="groupTitle">Keine Gruppe</h1>
+  <!-- 🔴 NEU: Gruppe verlassen -->
+  <button id="leaveGroupBtn" style="width:100%;margin-bottom:10px;">
+    🚪 Gruppe verlassen
+  </button>
+
+  <div id="pickupBox">
+    <span>🚗💨</span>
+    <input id="pickupInput" placeholder="Abholer Name">
+    <button id="savePickup">✔</button>
+    <button id="clearPickup">✖</button>
   </div>
 
-  <input id="groupCodeInput" placeholder="Gruppencode">
-  <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
+  <div class="header-moon">
+    <h1 id="groupTitle">Brotify</h1>
+    <p id="groupCode"></p>
+  </div>
 
+  <input id="family" placeholder="Dein Name">
+  <div id="pickupInline" class="pickup-under">🚗💨 kein Abholer</div>
+
+  <div id="iconPicker"></div>
   <div id="products"></div>
 
+  <textarea id="remark" placeholder="Bemerkung (z.B. 3 Eier)"></textarea>
   <button id="saveBtn">🛒 Bestellung speichern</button>
 
   <h2>📋 Bestellungen</h2>
   <div id="overview"></div>
+
+  <h2>🧾 Einkaufszettel</h2>
+  <div id="shoppingList"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>

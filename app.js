@@ -53,7 +53,7 @@ async function hash(text) {
   const enc = new TextEncoder().encode(text);
   const buf = await crypto.subtle.digest("SHA-256", enc);
   return Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2, "0"))
+    .map(b => b.toString(16).padStart(2,"0"))
     .join("");
 }
 
@@ -100,8 +100,14 @@ logoutBtn.onclick = () => {
 function startUserSession(u) {
   currentUser = u;
   nameInput.value = u;
+
   loginScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
+
+  // 🔴 WICHTIGER FIX:
+  // Produkte & Icons IMMER anzeigen
+  renderIcons();
+  renderProducts();
 }
 
 /******** AUTO LOGIN ********/
@@ -166,7 +172,7 @@ function enterGroup(groupName) {
   document.getElementById("groupCode").textContent =
     "🔑 Einladungscode: " + currentGroup;
 
-  initApp();
+  initGroupLive();
 }
 
 /******** ICON PICKER ********/
@@ -185,7 +191,7 @@ function renderIcons(active = selectedIcon) {
   });
 }
 
-/******** PRODUKTE (ORIGINAL) ********/
+/******** PRODUKTE ********/
 function renderProducts(items = {}) {
   productsEl.innerHTML = "";
   cart = {};
@@ -234,30 +240,8 @@ function renderProducts(items = {}) {
   }
 }
 
-/******** SPEICHERN ********/
-saveBtn.onclick = () => {
-  if (!currentGroup) return alert("Keine Gruppe aktiv");
-
-  const data = {
-    name: currentUser,
-    icon: selectedIcon,
-    remark: remarkInput.value.trim(),
-    items: cart,
-    time: Date.now()
-  };
-
-  const ref = db.ref(`groups/${currentGroup}/orders`);
-  editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
-
-  editOrderId = null;
-  remarkInput.value = "";
-  selectedIcon = ICONS[0];
-  renderIcons();
-  renderProducts();
-};
-
-/******** LIVE ********/
-function initApp() {
+/******** LIVE – GRUPPE ********/
+function initGroupLive() {
   renderIcons();
   renderProducts();
 

@@ -9,15 +9,17 @@
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <h1>🍞 Brotify</h1>
   <input id="userName" placeholder="Dein Name">
   <button id="createGroupBtn">➕ Gruppe erstellen</button>
   <hr>
-  <input id="joinCode" placeholder="Einladungscode">
+  <input id="joinCode" placeholder="Einladungscode (z.B. A9F3KQ2Z)">
   <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
 </div>
 
+<!-- APP -->
 <div id="appScreen" class="hidden">
 
   <div id="pickupBox">
@@ -32,13 +34,14 @@
     <p id="groupCode"></p>
   </div>
 
-  <input id="family" placeholder="Dein Name">
   <div id="pickupInline" class="pickup-under">🚗💨 kein Abholer</div>
+
+  <input id="family" placeholder="Dein Name">
 
   <div id="iconPicker"></div>
   <div id="products"></div>
 
-  <textarea id="remark" placeholder="Bemerkung"></textarea>
+  <textarea id="remark" placeholder="Bemerkung (z.B. 3 Eier)"></textarea>
   <button id="saveBtn">🛒 Bestellung speichern</button>
 
   <h2>📋 Bestellungen</h2>
@@ -46,6 +49,7 @@
 
   <h2>🧾 Einkaufszettel</h2>
   <div id="shoppingList"></div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>

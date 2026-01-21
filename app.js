@@ -1,3 +1,4 @@
+alert("APP STARTET");
 /******** FIREBASE ********/
 const firebaseConfig = {
   apiKey: "AIzaSyBXFdU_DmIUl0Oc2wGF2ODAqh7NRWeVBMc",

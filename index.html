@@ -4,12 +4,16 @@
   <meta charset="UTF-8">
   <title>Brotify 🍞</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- STYLE -->
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <h2>Login</h2>
+  <h1>Brotify</h1>
   <input id="loginUser" placeholder="Benutzername">
   <input id="loginPass" type="password" placeholder="Passwort">
   <button id="loginBtn">Anmelden</button>
@@ -17,17 +21,21 @@
 </div>
 
 <!-- APP -->
-<div id="appScreen" style="display:none;">
-  <h2 id="groupTitle">Keine Gruppe</h2>
-  <input id="groupCodeInput" placeholder="Gruppencode">
-  <button id="joinGroupBtn">Gruppe beitreten</button>
+<div id="appScreen" class="hidden">
 
-  <h3>Produkte</h3>
+  <div class="header-moon">
+    <h1 id="groupTitle">Keine Gruppe</h1>
+    <p id="groupCode"></p>
+  </div>
+
+  <input id="groupCodeInput" placeholder="Gruppencode">
+  <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
+
   <div id="products"></div>
 
   <button id="saveBtn">🛒 Bestellung speichern</button>
 
-  <h3>Bestellungen</h3>
+  <h2>📋 Bestellungen</h2>
   <div id="overview"></div>
 </div>
 

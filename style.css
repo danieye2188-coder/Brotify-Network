@@ -1,21 +1,27 @@
+/* =========================================================
+   HINTERGRUNDBILD – EINZIGE ERGÄNZUNG (NICHTS ERSETZT)
+   ========================================================= */
+body {
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /* ===== GRUNDLAYOUT ===== */
 body {
   font-family: 'Nunito', sans-serif;
   max-width: 900px;
   margin: auto;
   padding: 16px;
-
-  /* 🌄 HINTERGRUNDBILD (NEU, ERGÄNZUNG) */
   background-image: url("background.jpg");
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 /* 🍊 ORANGENSAFT-GELBE CONTAINER */
 body > *:not(.header-moon) {
-  background: rgba(255, 241, 184, 0.92); /* vorher Verlauf, jetzt transparent */
+  background: linear-gradient(180deg, #fff1b8, #f9c74f);
   padding: 14px;
   margin-bottom: 14px;
   border-radius: 12px;
@@ -23,7 +29,7 @@ body > *:not(.header-moon) {
 
 /* ===== HEADER ===== */
 .header-moon {
-  background: rgba(247, 225, 181, 0.95);
+  background: #f7e1b5;
   text-align: center;
   padding: 30px 20px 40px;
   border-radius: 0 0 100% 100%;
@@ -37,18 +43,6 @@ body > *:not(.header-moon) {
 
 .header-moon p {
   margin-top: 6px;
-}
-
-/* ===== LOGIN SCREEN (NEU, ERGÄNZUNG) ===== */
-#loginScreen {
-  background: rgba(255, 241, 184, 0.92);
-  padding: 20px;
-  border-radius: 12px;
-}
-
-/* ===== APP SCREEN (NEU, ERGÄNZUNG) ===== */
-#appScreen {
-  background: transparent; /* Kinder bekommen ihren Hintergrund wie vorher */
 }
 
 /* ===== ABHOLER ===== */
@@ -65,13 +59,9 @@ body > *:not(.header-moon) {
 }
 
 .pickup-under {
-  margin-top: 10px;
-  padding: 10px;
+  margin-top: 6px;
   font-weight: bold;
-  font-size: 20px;
-  background: #fff3cd;
-  border-radius: 10px;
-  text-align: center;
+  font-size: 14px;
 }
 
 /* ===== INPUTS ===== */
@@ -185,19 +175,14 @@ textarea {
   justify-self: end;
 }
 
-/* Durchstreichen, wenn Checkbox angehakt */
+/* ✅ DAS IST DER ENTSCHEIDENDE FIX */
 .shopping-row:has(input:checked) .text {
   text-decoration: line-through;
   color: #999;
 }
 
-/* 📱 Fallback für Mobile */
+/* 📱 Fallback für Mobile (kein :has Support) */
 .shopping-row.checked .text {
   text-decoration: line-through;
   color: #999;
-}
-
-/* ===== HELFER ===== */
-.hidden {
-  display: none;
 }

@@ -1,202 +1,154 @@
 /******** FIREBASE ********/
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyBXFdU_DmIUl0Oc2wGF2ODAqh7NRWeVBMc",
   authDomain: "brotify-network.firebaseapp.com",
-  projectId: "brotify-network",
-  storageBucket: "brotify-network.firebasestorage.app",
-  messagingSenderId: "916259400168",
-  appId: "1:916259400168:web:221877f89220e7c6225c5d"
-};
-firebase.initializeApp(firebaseConfig);
+  databaseURL: "https://brotify-network-default-rtdb.firebaseio.com"
+});
 const db = firebase.database();
 
+/******** DOM ********/
+const loginScreen = document.getElementById("loginScreen");
+const appScreen   = document.getElementById("appScreen");
+
+const loginUser   = document.getElementById("loginUser");
+const loginPass   = document.getElementById("loginPass");
+const loginBtn    = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+
+const groupTitle  = document.getElementById("groupTitle");
+const groupCodeInput = document.getElementById("groupCodeInput");
+const joinGroupBtn   = document.getElementById("joinGroupBtn");
+
+const productsEl = document.getElementById("products");
+const saveBtn    = document.getElementById("saveBtn");
+const overviewEl = document.getElementById("overview");
+
 /******** STATE ********/
-let currentUser = null;
+let currentUser  = null;
 let currentGroup = null;
 let cart = {};
-let selectedIcon = "🦊";
-let editOrderId = null;
 
-/******** CONSTANTS ********/
-const ICONS = ["🦊","🐻","🦄","🍄","👻","🐸","🐼","🐱","🐶","🦉","🐯","🐷","🐮","🐰","🐵"];
-
-const PRODUCTS = {
-  "Weckle & Brötchen": [
-    "Laugenweckle","Körnerweckle","Doppelweckle","Seelen",
-    "Sonnenblumeweckle","Kürbisweckle","Dinkelweckle",
-    "Vollkornweckle","Mehrkornweckle","Roggenweckle"
-  ],
-  "Laugengebäck & Laugenecken": [
-    "Laugenstange","Laugenhörnchen",
-    "Laugenecke klassisch","Laugenecke mit Körnern","Brezel"
-  ],
-  "Croissants & süßes Gebäck": [
-    "Buttercroissant","Schokocroissant"
-  ],
-  "Brote & Zopf": [
-    "Zopf","Kleines Landbrot"
-  ]
-};
-
-/******** DOM – URSPRUNG ********/
-const productsEl = document.getElementById("products");
-const overviewEl = document.getElementById("overview");
-const shoppingListEl = document.getElementById("shoppingList");
-const nameInput = document.getElementById("family");
-const remarkInput = document.getElementById("remark");
-const pickupInline = document.getElementById("pickupInline");
-const pickupInput = document.getElementById("pickupInput");
-const saveBtn = document.getElementById("saveBtn");
-
-/******** ICON PICKER – URSPRUNG ********/
-function renderIcons(active = selectedIcon) {
-  const picker = document.getElementById("iconPicker");
-  picker.innerHTML = "";
-  ICONS.forEach(icon => {
-    const span = document.createElement("span");
-    span.textContent = icon;
-    span.className = "icon" + (icon === active ? " selected" : "");
-    span.onclick = () => {
-      selectedIcon = icon;
-      renderIcons(icon);
-    };
-    picker.appendChild(span);
-  });
+/******** HASH ********/
+async function hash(text) {
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  );
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2,"0"))
+    .join("");
 }
 
-/******** PRODUKTE – URSPRUNG ********/
-function renderProducts(items = {}) {
+/******** LOGIN ********/
+loginBtn.onclick = async () => {
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (!u || !p) return alert("Alles ausfüllen");
+
+  const h = await hash(p);
+  const snap = await db.ref("users/" + u).get();
+  if (!snap.exists()) return alert("User existiert nicht");
+  if (snap.val().password !== h) return alert("Falsches Passwort");
+
+  localStorage.setItem("user", u);
+  startSession(u);
+};
+
+registerBtn.onclick = async () => {
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (!u || !p) return alert("Alles ausfüllen");
+
+  const h = await hash(p);
+  const ref = db.ref("users/" + u);
+  if ((await ref.get()).exists()) return alert("User existiert schon");
+
+  await ref.set({ password: h });
+  localStorage.setItem("user", u);
+  startSession(u);
+};
+
+/******** SESSION ********/
+function startSession(u) {
+  currentUser = u;
+  loginScreen.style.display = "none";
+  appScreen.style.display = "block";
+
+  const g = localStorage.getItem("group");
+  if (g) joinGroup(g);
+}
+
+/******** AUTOLOGIN ********/
+const savedUser = localStorage.getItem("user");
+if (savedUser) startSession(savedUser);
+
+/******** GRUPPE ********/
+joinGroupBtn.onclick = () => {
+  joinGroup(groupCodeInput.value.trim());
+};
+
+function joinGroup(code) {
+  if (!code) return alert("Code eingeben");
+  currentGroup = code;
+  localStorage.setItem("group", code);
+
+  groupTitle.textContent = "Gruppe: " + code;
+  renderProducts();
+  listenOrders();
+}
+
+/******** PRODUKTE ********/
+function renderProducts() {
   productsEl.innerHTML = "";
   cart = {};
 
-  for (let cat in PRODUCTS) {
-    const h = document.createElement("h3");
-    h.textContent = cat;
-    productsEl.appendChild(h);
+  ["Brezel","Brötchen","Croissant"].forEach(p => {
+    cart[p] = 0;
 
-    PRODUCTS[cat].forEach(p => {
-      cart[p] = items[p] || 0;
+    const row = document.createElement("div");
+    row.innerHTML = `
+      ${p}
+      <button>-</button>
+      <span>0</span>
+      <button>+</button>
+    `;
 
-      const row = document.createElement("div");
-      row.className = "product";
+    const [ , minus, amount, plus ] = row.children;
 
-      const name = document.createElement("div");
-      name.textContent = p;
-
-      const minus = document.createElement("button");
-      minus.textContent = "−";
-      minus.className = "pm";
-
-      const amt = document.createElement("div");
-      amt.className = "amount";
-      amt.textContent = cart[p];
-
-      const plus = document.createElement("button");
-      plus.textContent = "+";
-      plus.className = "pm";
-
-      minus.onclick = () => {
-        if (cart[p] > 0) {
-          cart[p]--;
-          amt.textContent = cart[p];
-        }
-      };
-
-      plus.onclick = () => {
-        cart[p]++;
-        amt.textContent = cart[p];
-      };
-
-      row.append(name, minus, amt, plus);
-      productsEl.appendChild(row);
-    });
-  }
-}
-
-/******** SPEICHERN – URSPRUNG + GRUPPE ********/
-saveBtn.onclick = () => {
-  if (!currentGroup) return alert("Keine Gruppe aktiv");
-
-  const name = currentUser;
-  if (!name) return alert("Nicht eingeloggt");
-
-  const data = {
-    name,
-    icon: selectedIcon,
-    remark: remarkInput.value.trim(),
-    items: cart,
-    time: Date.now()
-  };
-
-  const ref = db.ref(`groups/${currentGroup}/orders`);
-
-  editOrderId
-    ? ref.child(editOrderId).set(data)
-    : ref.push(data);
-
-  editOrderId = null;
-  remarkInput.value = "";
-  selectedIcon = ICONS[0];
-  renderIcons();
-  renderProducts();
-};
-
-/******** LIVE – URSPRUNG + GRUPPE ********/
-function initGroupLive() {
-  db.ref(`groups/${currentGroup}/orders`).on("value", snap => {
-    overviewEl.innerHTML = "";
-    shoppingListEl.innerHTML = "";
-
-    const totals = {};
-    const remarks = [];
-
-    snap.forEach(c => {
-      const d = c.val();
-
-      const box = document.createElement("div");
-      box.className = "overview-box";
-      box.innerHTML = `${d.icon} <b>${d.name}</b>`;
-
-      if (d.remark) {
-        box.innerHTML += `<div class="remark">📝 ${d.remark}</div>`;
-        remarks.push(`📝 ${d.name}: ${d.remark}`);
+    minus.onclick = () => {
+      if (cart[p] > 0) {
+        cart[p]--;
+        amount.textContent = cart[p];
       }
+    };
 
-      for (let i in d.items) {
-        if (d.items[i] > 0) {
-          totals[i] = (totals[i] || 0) + d.items[i];
-          box.innerHTML += `<br>${i}: ${d.items[i]}×`;
-        }
-      }
+    plus.onclick = () => {
+      cart[p]++;
+      amount.textContent = cart[p];
+    };
 
-      overviewEl.appendChild(box);
-    });
-
-    Object.keys(totals).forEach(item => {
-      shoppingListEl.innerHTML += `
-        <label class="shopping-row">
-          <span class="text">${totals[item]}× ${item}</span>
-          <input type="checkbox">
-        </label>`;
-    });
-
-    remarks.forEach(r => {
-      shoppingListEl.innerHTML += `
-        <label class="shopping-row">
-          <span class="text">${r}</span>
-          <input type="checkbox">
-        </label>`;
-    });
+    productsEl.appendChild(row);
   });
 }
 
-/******** ENTER GROUP ********/
-function enterGroup(groupName) {
-  document.getElementById("groupTitle").textContent = groupName;
-  document.getElementById("groupCode").textContent =
-    "🔑 Einladungscode: " + currentGroup;
+/******** SPEICHERN ********/
+saveBtn.onclick = () => {
+  if (!currentGroup) return alert("Keine Gruppe");
+  db.ref(`groups/${currentGroup}/orders`).push({
+    user: currentUser,
+    items: cart,
+    time: Date.now()
+  });
+};
 
-  renderIcons();
-  renderProducts();
-  initGroupLive();
+/******** LIVE ********/
+function listenOrders() {
+  db.ref(`groups/${currentGroup}/orders`).on("value", snap => {
+    overviewEl.innerHTML = "";
+    snap.forEach(c => {
+      const d = c.val();
+      overviewEl.innerHTML +=
+        `<div><b>${d.user}</b>: ${JSON.stringify(d.items)}</div>`;
+    });
+  });
 }

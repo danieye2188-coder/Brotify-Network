@@ -4,59 +4,31 @@
   <meta charset="UTF-8">
   <title>Brotify 🍞</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <h1>🍞 Brotify</h1>
-
+  <h2>Login</h2>
   <input id="loginUser" placeholder="Benutzername">
   <input id="loginPass" type="password" placeholder="Passwort">
-
-  <button id="loginBtn">🔐 Anmelden</button>
-  <button id="registerBtn">🆕 Neu registrieren</button>
-
-  <input id="loginJoinCode" placeholder="Gruppe beitreten (Code optional)">
+  <button id="loginBtn">Anmelden</button>
+  <button id="registerBtn">Registrieren</button>
 </div>
 
 <!-- APP -->
-<div id="appScreen" class="hidden">
+<div id="appScreen" style="display:none;">
+  <h2 id="groupTitle">Keine Gruppe</h2>
+  <input id="groupCodeInput" placeholder="Gruppencode">
+  <button id="joinGroupBtn">Gruppe beitreten</button>
 
-  <button id="logoutBtn" style="width:100%;margin-bottom:10px;">🚪 Logout</button>
-
-  <!-- NEU: GRUPPENSTEUERUNG -->
-  <button id="createGroupBtn" style="width:100%;margin-bottom:6px;">➕ Gruppe erstellen</button>
-  <button id="joinGroupBtn" style="width:100%;margin-bottom:10px;">🔑 Gruppe beitreten</button>
-
-  <div class="header-moon">
-    <h1 id="groupTitle">Keine Gruppe</h1>
-    <p id="groupCode"></p>
-  </div>
-
-  <div id="pickupBox">
-    <span>🚗💨</span>
-    <input id="pickupInput" placeholder="Abholer Name">
-    <button id="savePickup">✔</button>
-    <button id="clearPickup">✖</button>
-  </div>
-
-  <input id="family" placeholder="Dein Name" disabled>
-  <div id="pickupInline" class="pickup-under">🚗💨 kein Abholer</div>
-
-  <div id="iconPicker"></div>
+  <h3>Produkte</h3>
   <div id="products"></div>
 
-  <textarea id="remark" placeholder="Bemerkung (z.B. 3 Eier)"></textarea>
   <button id="saveBtn">🛒 Bestellung speichern</button>
 
-  <h2>📋 Bestellungen</h2>
+  <h3>Bestellungen</h3>
   <div id="overview"></div>
-
-  <h2>🧾 Einkaufszettel</h2>
-  <div id="shoppingList"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>

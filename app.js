@@ -10,131 +10,230 @@ firebase.initializeApp({
 const db = firebase.database();
 
 /******** STATE ********/
-let currentUser = null;
 let currentGroup = null;
 let cart = {};
 let selectedIcon = "🦊";
+let editOrderId = null;
 
-/******** DOM ********/
+/******** CONSTANTS ********/
+const ICONS = ["🦊","🐻","🦄","🍄","👻","🐸","🐼","🐱","🐶","🦉","🐯","🐷","🐮","🐰","🐵"];
+
+const PRODUCTS = {
+  "Weckle & Brötchen": [
+    "Laugenweckle","Körnerweckle","Doppelweckle","Seelen",
+    "Sonnenblumeweckle","Kürbisweckle","Dinkelweckle",
+    "Vollkornweckle","Mehrkornweckle","Roggenweckle"
+  ],
+  "Laugengebäck & Laugenecken": [
+    "Laugenstange","Laugenhörnchen",
+    "Laugenecke klassisch","Laugenecke mit Körnern","Brezel"
+  ],
+  "Croissants & süßes Gebäck": [
+    "Buttercroissant","Schokocroissant"
+  ],
+  "Brote & Zopf": [
+    "Zopf","Kleines Landbrot"
+  ]
+};
+
+/******** LOGIN ********/
 const loginScreen = document.getElementById("loginScreen");
-const groupScreen = document.getElementById("groupScreen");
 const appScreen = document.getElementById("appScreen");
-
-/******** UTIL ********/
-function show(screen) {
-  [loginScreen, groupScreen, appScreen].forEach(s => s.classList.add("hidden"));
-  screen.classList.remove("hidden");
-}
 
 function genCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-/******** LOGIN ********/
 document.getElementById("createGroupBtn").onclick = () => {
   const name = userName.value.trim();
   if (!name) return alert("Name eingeben");
 
-  currentUser = genCode();
-  const groupId = genCode();
+  const gid = genCode();
+  db.ref("groups/" + gid).set({ created: Date.now() });
 
-  db.ref(`groups/${groupId}`).set({
-    owner: currentUser,
-    members: { [currentUser]: name }
-  });
-
-  db.ref(`users/${currentUser}`).set({
-    name,
-    groups: { [groupId]: true }
-  });
-
-  loadGroups();
+  enterGroup(gid, name);
 };
 
 document.getElementById("joinGroupBtn").onclick = () => {
-  const code = joinCode.value.trim().toUpperCase();
+  const gid = joinCode.value.trim().toUpperCase();
   const name = userName.value.trim();
-  if (!code || !name) return alert("Name & Code nötig");
+  if (!gid || !name) return alert("Name & Code eingeben");
 
-  currentUser = genCode();
-  db.ref(`groups/${code}`).once("value", snap => {
+  db.ref("groups/" + gid).once("value", snap => {
     if (!snap.exists()) return alert("Gruppe nicht gefunden");
-
-    db.ref(`groups/${code}/members/${currentUser}`).set(name);
-    db.ref(`users/${currentUser}`).set({
-      name,
-      groups: { [code]: true }
-    });
-
-    loadGroups();
+    enterGroup(gid, name);
   });
 };
 
-/******** GRUPPEN ********/
-function loadGroups() {
-  show(groupScreen);
-  const list = document.getElementById("groupList");
-  list.innerHTML = "";
+function enterGroup(gid, name) {
+  currentGroup = gid;
+  family.value = name;
+  document.getElementById("groupCode").textContent = "🔑 Einladungscode: " + gid;
+  loginScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
 
-  db.ref(`users/${currentUser}/groups`).once("value", snap => {
-    snap.forEach(g => {
-      const btn = document.createElement("button");
-      btn.textContent = "➡ Gruppe " + g.key;
-      btn.onclick = () => enterGroup(g.key);
-      list.appendChild(btn);
-    });
+  initApp();
+}
+
+/******** DOM ********/
+const productsEl = document.getElementById("products");
+const overviewEl = document.getElementById("overview");
+const shoppingListEl = document.getElementById("shoppingList");
+const remarkInput = document.getElementById("remark");
+const pickupInline = document.getElementById("pickupInline");
+const pickupInput = document.getElementById("pickupInput");
+const saveBtn = document.getElementById("saveBtn");
+
+/******** ICON PICKER ********/
+function renderIcons(active = selectedIcon) {
+  const picker = document.getElementById("iconPicker");
+  picker.innerHTML = "";
+  ICONS.forEach(icon => {
+    const span = document.createElement("span");
+    span.textContent = icon;
+    span.className = "icon" + (icon === active ? " selected" : "");
+    span.onclick = () => {
+      selectedIcon = icon;
+      renderIcons(icon);
+    };
+    picker.appendChild(span);
   });
 }
 
-function enterGroup(id) {
-  currentGroup = id;
-  document.getElementById("groupCode").textContent = "🔑 Einladungscode: " + id;
-  show(appScreen);
-  listenOrders();
+/******** PRODUKTE ********/
+function renderProducts(items = {}) {
+  productsEl.innerHTML = "";
+  cart = {};
+
+  for (let cat in PRODUCTS) {
+    const h = document.createElement("h3");
+    h.textContent = cat;
+    productsEl.appendChild(h);
+
+    PRODUCTS[cat].forEach(p => {
+      cart[p] = items[p] || 0;
+
+      const row = document.createElement("div");
+      row.className = "product";
+
+      const name = document.createElement("div");
+      name.textContent = p;
+
+      const minus = document.createElement("button");
+      minus.textContent = "−";
+      minus.className = "pm";
+
+      const amt = document.createElement("div");
+      amt.className = "amount";
+      amt.textContent = cart[p];
+
+      const plus = document.createElement("button");
+      plus.textContent = "+";
+      plus.className = "pm";
+
+      minus.onclick = () => {
+        if (cart[p] > 0) {
+          cart[p]--;
+          amt.textContent = cart[p];
+        }
+      };
+
+      plus.onclick = () => {
+        cart[p]++;
+        amt.textContent = cart[p];
+      };
+
+      row.append(name, minus, amt, plus);
+      productsEl.appendChild(row);
+    });
+  }
 }
 
-/******** BESTELLUNGEN ********/
-function listenOrders() {
-  db.ref(`groups/${currentGroup}/orders`).on("value", snap => {
-    overview.innerHTML = "";
-    shoppingList.innerHTML = "";
+/******** SPEICHERN ********/
+saveBtn.onclick = () => {
+  const name = family.value.trim();
+  if (!name) return alert("Bitte deinen Namen eingeben");
+
+  const data = {
+    name,
+    icon: selectedIcon,
+    remark: remarkInput.value.trim(),
+    items: cart,
+    time: Date.now()
+  };
+
+  const ref = db.ref("groups/" + currentGroup + "/orders");
+  editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
+
+  editOrderId = null;
+  saveBtn.textContent = "🛒 Bestellung speichern";
+  remarkInput.value = "";
+  renderProducts();
+};
+
+/******** LIVE ********/
+function initApp() {
+  renderIcons();
+  renderProducts();
+
+  db.ref("groups/" + currentGroup + "/orders").on("value", snap => {
+    overviewEl.innerHTML = "";
+    shoppingListEl.innerHTML = "";
+
     const totals = {};
+    const remarks = [];
 
     snap.forEach(c => {
       const d = c.val();
       const box = document.createElement("div");
-      box.textContent = d.name;
-      overview.appendChild(box);
+      box.className = "overview-box";
+      box.innerHTML = `${d.icon} <b>${d.name}</b>`;
+
+      if (d.remark) {
+        box.innerHTML += `<div class="remark">📝 ${d.remark}</div>`;
+        remarks.push(`📝 ${d.name}: ${d.remark}`);
+      }
 
       for (let i in d.items) {
-        totals[i] = (totals[i] || 0) + d.items[i];
+        if (d.items[i] > 0) {
+          totals[i] = (totals[i] || 0) + d.items[i];
+          box.innerHTML += `<br>${i}: ${d.items[i]}×`;
+        }
       }
+
+      overviewEl.appendChild(box);
     });
 
-    for (let i in totals) {
-      shoppingList.innerHTML += `<div>${totals[i]}× ${i}</div>`;
-    }
+    Object.keys(totals).forEach(item => {
+      shoppingListEl.innerHTML += `
+        <label class="shopping-row">
+          <span class="text">${totals[item]}× ${item}</span>
+          <input type="checkbox">
+        </label>`;
+    });
+
+    remarks.forEach(r => {
+      shoppingListEl.innerHTML += `
+        <label class="shopping-row">
+          <span class="text">${r}</span>
+          <input type="checkbox">
+        </label>`;
+    });
+  });
+
+  db.ref("groups/" + currentGroup + "/meta/abholer").on("value", snap => {
+    pickupInline.textContent = snap.val()
+      ? `🚗💨 Abholer: ${snap.val()}`
+      : "🚗💨 kein Abholer";
   });
 }
 
-saveBtn.onclick = () => {
-  const name = family.value.trim();
-  if (!name) return alert("Name fehlt");
-
-  db.ref(`groups/${currentGroup}/orders`).push({
-    name,
-    icon: selectedIcon,
-    items: cart,
-    remark: remark.value,
-    time: Date.now()
-  });
+savePickup.onclick = () => {
+  const v = pickupInput.value.trim();
+  if (v) db.ref("groups/" + currentGroup + "/meta/abholer").set(v);
+  pickupInput.value = "";
 };
 
-/******** DELETE GROUP ********/
-deleteGroupBtn.onclick = () => {
-  if (confirm("Gruppe wirklich löschen?")) {
-    db.ref(`groups/${currentGroup}`).remove();
-    show(groupScreen);
-    loadGroups();
-  }
+clearPickup.onclick = () => {
+  db.ref("groups/" + currentGroup + "/meta/abholer").remove();
 };

@@ -213,3 +213,37 @@ textarea {
 .hidden {
   display: none;
 }
+/* Hintergrundbild */
+body {
+  font-family: 'Nunito', sans-serif;
+  max-width: 900px;
+  margin: auto;
+  padding: 16px;
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Abholer größer & auffälliger */
+.pickup-under {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  background: #fff3cd;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Login */
+#loginScreen {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}

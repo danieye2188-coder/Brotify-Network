@@ -11,7 +11,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /******** STATE ********/
-let currentGroup = null;          // 🔹 NEU (für Gruppen)
+let currentGroup = null;
 let cart = {};
 let selectedIcon = "🦊";
 let editOrderId = null;
@@ -61,25 +61,24 @@ createGroupBtn.onclick = () => {
     created: Date.now()
   });
 
-  saveSession(groupName, userNameVal);   // 🔹 NEU
+  saveSession(groupName, userNameVal);
   enterGroup(groupName, userNameVal);
 };
 
 joinGroupBtn.onclick = () => {
   const code = joinCode.value.trim().toUpperCase();
-  const name = joinName.value.trim();
-  if (!code || !name) return alert("Code & Name eingeben");
+  const userNameVal = joinName.value.trim();
+  if (!code || !userNameVal) return alert("Code & Name eingeben");
 
   db.ref("groups/" + code).once("value", snap => {
     if (!snap.exists()) return alert("Gruppe nicht gefunden");
     currentGroup = code;
-
-    saveSession(snap.val().name, name); // 🔹 NEU
-    enterGroup(snap.val().name, name);
+    saveSession(snap.val().name, userNameVal);
+    enterGroup(snap.val().name, userNameVal);
   });
 };
 
-/******** SESSION (NEU – klar getrennt) ********/
+/******** SESSION (MERKEN, NICHT BINDEN) ********/
 function saveSession(groupName, userName) {
   localStorage.setItem("brotifyGroup", currentGroup);
   localStorage.setItem("brotifyGroupName", groupName);
@@ -96,6 +95,13 @@ function loadSession() {
     enterGroup(gn, u);
   }
 }
+
+/******** GRUPPE VERLASSEN ********/
+leaveGroupBtn.onclick = () => {
+  if (!confirm("Gruppe wirklich verlassen?")) return;
+  localStorage.clear();
+  location.reload();
+};
 
 /******** ENTER GROUP ********/
 function enterGroup(groupName, userNameVal) {
@@ -198,6 +204,8 @@ saveBtn.onclick = () => {
   editOrderId = null;
   saveBtn.textContent = "🛒 Bestellung speichern";
   remarkInput.value = "";
+  selectedIcon = ICONS[0];
+  renderIcons();
   renderProducts();
 };
 
@@ -296,7 +304,7 @@ document.getElementById("clearPickup").onclick = () => {
   db.ref(`groups/${currentGroup}/meta/abholer`).remove();
 };
 
-/******** AUTO-REJOIN (NEU) ********/
+/******** AUTO-REJOIN ********/
 window.addEventListener("load", () => {
   loadSession();
 });

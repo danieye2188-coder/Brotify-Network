@@ -11,6 +11,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /******** STATE ********/
+let currentUser = null;
 let currentGroup = null;
 let cart = {};
 let selectedIcon = "🦊";
@@ -47,72 +48,128 @@ const pickupInline = document.getElementById("pickupInline");
 const pickupInput = document.getElementById("pickupInput");
 const saveBtn = document.getElementById("saveBtn");
 
-/******** LOGIN / GRUPPEN (ERGÄNZUNG) ********/
-createGroupBtn.onclick = () => {
-  const groupName = groupNameInput.value.trim();
-  const userNameVal = userName.value.trim();
-  if (!groupName || !userNameVal) return alert("Gruppenname & Name eingeben");
+/******** LOGIN – HASH ********/
+async function hash(text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
-  const ref = db.ref("groups").push();
-  currentGroup = ref.key.substring(0, 8).toUpperCase();
+/******** LOGIN ********/
+loginBtn.onclick = async () => {
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (!u || !p) return alert("Alles ausfüllen");
 
-  db.ref("groups/" + currentGroup).set({ name: groupName, created: Date.now() });
+  const h = await hash(p);
+  db.ref("users/" + u).once("value", snap => {
+    if (!snap.exists()) return alert("Benutzer existiert nicht");
+    if (snap.val().password !== h) return alert("Falsches Passwort");
 
-  saveSession(groupName, userNameVal);
-  enterGroup(groupName, userNameVal);
-};
-
-joinGroupBtn.onclick = () => {
-  const code = joinCode.value.trim().toUpperCase();
-  const userNameVal = joinName.value.trim();
-  if (!code || !userNameVal) return alert("Code & Name eingeben");
-
-  db.ref("groups/" + code).once("value", snap => {
-    if (!snap.exists()) return alert("Gruppe nicht gefunden");
-    currentGroup = code;
-    saveSession(snap.val().name, userNameVal);
-    enterGroup(snap.val().name, userNameVal);
+    localStorage.setItem("brotifyUser", u);
+    startUserSession(u);
   });
 };
 
-/******** SESSION (NUR MERKEN) ********/
-function saveSession(groupName, userName) {
-  localStorage.setItem("brotifyGroup", currentGroup);
-  localStorage.setItem("brotifyGroupName", groupName);
-  localStorage.setItem("brotifyUserName", userName);
-}
+registerBtn.onclick = async () => {
+  const u = loginUser.value.trim();
+  const p = loginPass.value;
+  if (!u || !p) return alert("Alles ausfüllen");
 
-function loadSession() {
-  const g = localStorage.getItem("brotifyGroup");
-  const gn = localStorage.getItem("brotifyGroupName");
-  const u = localStorage.getItem("brotifyUserName");
-  if (g && gn && u) {
-    currentGroup = g;
-    enterGroup(gn, u);
-  }
-}
+  const h = await hash(p);
+  db.ref("users/" + u).once("value", snap => {
+    if (snap.exists()) return alert("Benutzer existiert bereits");
 
-/******** GRUPPE VERLASSEN ********/
-leaveGroupBtn.onclick = () => {
-  if (!confirm("Gruppe wirklich verlassen?")) return;
+    db.ref("users/" + u).set({
+      password: h,
+      created: Date.now()
+    });
+
+    localStorage.setItem("brotifyUser", u);
+    startUserSession(u);
+  });
+};
+
+logoutBtn.onclick = () => {
   localStorage.clear();
   location.reload();
 };
 
+function startUserSession(u) {
+  currentUser = u;
+  nameInput.value = u;
+  loginScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
+}
+
+/******** AUTO LOGIN ********/
+window.addEventListener("load", () => {
+  const u = localStorage.getItem("brotifyUser");
+  const g = localStorage.getItem("brotifyGroup");
+  const gn = localStorage.getItem("brotifyGroupName");
+
+  if (u) {
+    startUserSession(u);
+    if (g && gn) {
+      currentGroup = g;
+      enterGroup(gn);
+    }
+  }
+});
+
+/******** GRUPPEN ********/
+createGroupBtn.onclick = () => {
+  const groupName = groupNameInput.value.trim();
+  if (!groupName) return alert("Gruppenname eingeben");
+
+  const ref = db.ref("groups").push();
+  currentGroup = ref.key.substring(0, 8).toUpperCase();
+
+  db.ref("groups/" + currentGroup).set({
+    name: groupName,
+    created: Date.now()
+  });
+
+  localStorage.setItem("brotifyGroup", currentGroup);
+  localStorage.setItem("brotifyGroupName", groupName);
+
+  enterGroup(groupName);
+};
+
+joinGroupBtn.onclick = () => {
+  const code = joinCode.value.trim().toUpperCase();
+  if (!code) return alert("Code eingeben");
+
+  db.ref("groups/" + code).once("value", snap => {
+    if (!snap.exists()) return alert("Gruppe nicht gefunden");
+
+    currentGroup = code;
+    localStorage.setItem("brotifyGroup", code);
+    localStorage.setItem("brotifyGroupName", snap.val().name);
+
+    enterGroup(snap.val().name);
+  });
+};
+
+leaveGroupBtn.onclick = () => {
+  if (!confirm("Gruppe wirklich verlassen?")) return;
+  localStorage.removeItem("brotifyGroup");
+  localStorage.removeItem("brotifyGroupName");
+  location.reload();
+};
+
 /******** ENTER GROUP ********/
-function enterGroup(groupName, userNameVal) {
+function enterGroup(groupName) {
   document.getElementById("groupTitle").textContent = groupName;
   document.getElementById("groupCode").textContent =
     "🔑 Einladungscode: " + currentGroup;
 
-  nameInput.value = userNameVal;
-  loginScreen.classList.add("hidden");
-  appScreen.classList.remove("hidden");
-
   initApp();
 }
 
-/******** ICON PICKER (ORIGINAL) ********/
+/******** ICON PICKER ********/
 function renderIcons(active = selectedIcon) {
   const picker = document.getElementById("iconPicker");
   picker.innerHTML = "";
@@ -128,7 +185,7 @@ function renderIcons(active = selectedIcon) {
   });
 }
 
-/******** PRODUKTE (EXAKT WIE FRÜHER) ********/
+/******** PRODUKTE (ORIGINAL) ********/
 function renderProducts(items = {}) {
   productsEl.innerHTML = "";
   cart = {};
@@ -171,20 +228,18 @@ function renderProducts(items = {}) {
         amt.textContent = cart[p];
       };
 
-      /* ⬅⬅⬅ WICHTIG: ORIGINAL-REIHENFOLGE */
       row.append(name, minus, amt, plus);
       productsEl.appendChild(row);
     });
   }
 }
 
-/******** SPEICHERN (ORIGINAL) ********/
+/******** SPEICHERN ********/
 saveBtn.onclick = () => {
-  const name = nameInput.value.trim();
-  if (!name) return alert("Bitte deinen Namen eingeben");
+  if (!currentGroup) return alert("Keine Gruppe aktiv");
 
   const data = {
-    name,
+    name: currentUser,
     icon: selectedIcon,
     remark: remarkInput.value.trim(),
     items: cart,
@@ -192,19 +247,16 @@ saveBtn.onclick = () => {
   };
 
   const ref = db.ref(`groups/${currentGroup}/orders`);
-  editOrderId
-    ? ref.child(editOrderId).set(data)
-    : ref.push(data);
+  editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
 
   editOrderId = null;
-  saveBtn.textContent = "🛒 Bestellung speichern";
   remarkInput.value = "";
   selectedIcon = ICONS[0];
   renderIcons();
   renderProducts();
 };
 
-/******** LIVE (ORIGINALDARSTELLUNG) ********/
+/******** LIVE ********/
 function initApp() {
   renderIcons();
   renderProducts();
@@ -237,16 +289,12 @@ function initApp() {
 
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️ Bearbeiten";
-      editBtn.style.float = "right";
       editBtn.onclick = () => {
         editOrderId = c.key;
-        nameInput.value = d.name;
-        remarkInput.value = d.remark || "";
         selectedIcon = d.icon;
+        remarkInput.value = d.remark || "";
         renderIcons(d.icon);
         renderProducts(d.items);
-        saveBtn.textContent = "✏️ Bestellung aktualisieren";
-        window.scrollTo({ top: 0, behavior: "smooth" });
       };
 
       const delBtn = document.createElement("button");
@@ -267,8 +315,7 @@ function initApp() {
         <label class="shopping-row">
           <span class="text">${totals[item]}× ${item}</span>
           <input type="checkbox">
-        </label>
-      `;
+        </label>`;
     });
 
     remarks.forEach(r => {
@@ -276,8 +323,7 @@ function initApp() {
         <label class="shopping-row">
           <span class="text">${r}</span>
           <input type="checkbox">
-        </label>
-      `;
+        </label>`;
     });
   });
 
@@ -288,7 +334,7 @@ function initApp() {
   });
 }
 
-/******** ABHOLER (ORIGINAL) ********/
+/******** ABHOLER ********/
 document.getElementById("savePickup").onclick = () => {
   const v = pickupInput.value.trim();
   if (v) db.ref(`groups/${currentGroup}/meta/abholer`).set(v);
@@ -298,6 +344,3 @@ document.getElementById("savePickup").onclick = () => {
 document.getElementById("clearPickup").onclick = () => {
   db.ref(`groups/${currentGroup}/meta/abholer`).remove();
 };
-
-/******** AUTO-REJOIN ********/
-window.addEventListener("load", loadSession);

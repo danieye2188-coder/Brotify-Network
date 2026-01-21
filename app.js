@@ -308,3 +308,6 @@ document.getElementById("joinGroupBtn").onclick = () => {
     initGroup(code);
   });
 };
+document.getElementById("createGroupBtn").onclick = () => {
+  alert("BUTTON GEKLICKT");
+};

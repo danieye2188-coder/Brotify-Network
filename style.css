@@ -210,3 +210,6 @@ textarea {
   font-weight: bold;
   margin-bottom: 10px;
 }
+.hidden {
+  display: none;
+}

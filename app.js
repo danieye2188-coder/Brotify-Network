@@ -1,12 +1,13 @@
 /******** FIREBASE ********/
-firebase.initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyBXFdU_DmIUl0Oc2wGF2ODAqh7NRWeVBMc",
   authDomain: "brotify-network.firebaseapp.com",
   projectId: "brotify-network",
   storageBucket: "brotify-network.firebasestorage.app",
   messagingSenderId: "916259400168",
   appId: "1:916259400168:web:221877f89220e7c6225c5d"
-});
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /******** STATE ********/
@@ -40,13 +41,12 @@ const PRODUCTS = {
 createGroupBtn.onclick = () => {
   const groupName = groupNameInput.value.trim();
   const userNameVal = userName.value.trim();
-  if (!groupName || !userNameVal) return alert("Gruppenname & Name eingeben");
+  if (!groupName || !userNameVal) return alert("Alles ausfüllen");
 
-  const rawKey = db.ref("groups").push().key;
-  const groupCode = rawKey.substring(0, 8).toUpperCase();
-  currentGroup = groupCode;
+  const ref = db.ref("groups").push();
+  currentGroup = ref.key.substring(0, 8).toUpperCase();
 
-  db.ref("groups/" + groupCode).set({
+  db.ref("groups/" + currentGroup).set({
     name: groupName,
     created: Date.now()
   });
@@ -73,6 +73,7 @@ function enterGroup(groupName, userNameVal) {
 
   loginScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
+
   initApp();
 }
 
@@ -81,19 +82,18 @@ const productsEl = document.getElementById("products");
 const overviewEl = document.getElementById("overview");
 const shoppingListEl = document.getElementById("shoppingList");
 const remarkInput = document.getElementById("remark");
+const pickupInline = document.getElementById("pickupInline");
+const pickupInput = document.getElementById("pickupInput");
 
 /******** ICON PICKER ********/
 function renderIcons(active = selectedIcon) {
   iconPicker.innerHTML = "";
   ICONS.forEach(icon => {
-    const span = document.createElement("span");
-    span.textContent = icon;
-    span.className = "icon" + (icon === active ? " selected" : "");
-    span.onclick = () => {
-      selectedIcon = icon;
-      renderIcons(icon);
-    };
-    iconPicker.appendChild(span);
+    const s = document.createElement("span");
+    s.textContent = icon;
+    s.className = "icon" + (icon === active ? " selected" : "");
+    s.onclick = () => { selectedIcon = icon; renderIcons(icon); };
+    iconPicker.appendChild(s);
   });
 }
 
@@ -101,7 +101,6 @@ function renderIcons(active = selectedIcon) {
 function renderProducts(items = {}) {
   productsEl.innerHTML = "";
   cart = {};
-
   for (let cat in PRODUCTS) {
     const h = document.createElement("h3");
     h.textContent = cat;
@@ -128,17 +127,8 @@ function renderProducts(items = {}) {
       plus.textContent = "+";
       plus.className = "pm";
 
-      minus.onclick = () => {
-        if (cart[p] > 0) {
-          cart[p]--;
-          amt.textContent = cart[p];
-        }
-      };
-
-      plus.onclick = () => {
-        cart[p]++;
-        amt.textContent = cart[p];
-      };
+      minus.onclick = () => { if (cart[p] > 0) amt.textContent = --cart[p]; };
+      plus.onclick = () => { amt.textContent = ++cart[p]; };
 
       row.append(name, minus, amt, plus);
       productsEl.appendChild(row);
@@ -163,8 +153,8 @@ saveBtn.onclick = () => {
   editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
 
   editOrderId = null;
-  saveBtn.textContent = "🛒 Bestellung speichern";
   remarkInput.value = "";
+  saveBtn.textContent = "🛒 Bestellung speichern";
   renderProducts();
 };
 
@@ -176,20 +166,14 @@ function initApp() {
   db.ref(`groups/${currentGroup}/orders`).on("value", snap => {
     overviewEl.innerHTML = "";
     shoppingListEl.innerHTML = "";
+
     const totals = {};
-    const remarks = [];
 
     snap.forEach(c => {
       const d = c.val();
-
       const box = document.createElement("div");
       box.className = "overview-box";
       box.innerHTML = `${d.icon} <b>${d.name}</b>`;
-
-      if (d.remark) {
-        box.innerHTML += `<div class="remark">📝 ${d.remark}</div>`;
-        remarks.push(`📝 ${d.name}: ${d.remark}`);
-      }
 
       for (let i in d.items) {
         if (d.items[i] > 0) {
@@ -198,7 +182,6 @@ function initApp() {
         }
       }
 
-      /* ✏️ BEARBEITEN */
       const editBtn = document.createElement("button");
       editBtn.textContent = "✏️";
       editBtn.style.float = "right";
@@ -213,7 +196,6 @@ function initApp() {
         window.scrollTo({ top: 0, behavior: "smooth" });
       };
 
-      /* ❌ LÖSCHEN */
       const delBtn = document.createElement("button");
       delBtn.textContent = "❌";
       delBtn.className = "delete-btn";
@@ -227,18 +209,10 @@ function initApp() {
       overviewEl.appendChild(box);
     });
 
-    Object.keys(totals).forEach(item => {
+    Object.keys(totals).forEach(i => {
       shoppingListEl.innerHTML += `
         <label class="shopping-row">
-          <span class="text">${totals[item]}× ${item}</span>
-          <input type="checkbox">
-        </label>`;
-    });
-
-    remarks.forEach(r => {
-      shoppingListEl.innerHTML += `
-        <label class="shopping-row">
-          <span class="text">${r}</span>
+          <span class="text">${totals[i]}× ${i}</span>
           <input type="checkbox">
         </label>`;
     });

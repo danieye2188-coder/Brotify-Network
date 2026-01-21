@@ -265,7 +265,17 @@ document.getElementById("createGroupBtn").onclick = () => {
   if (!name) return alert("Name fehlt");
 
   const groupId = Math.random().toString(36).substr(2, 6).toUpperCase();
-  groupRef = db.ref("groups/" + groupId);
+
+  // Gruppe anlegen
+  db.ref("groups/" + groupId).set({
+    createdAt: Date.now()
+  });
+
+  // Code anzeigen
+  document.getElementById("groupCodeValue").textContent = groupId;
+  document.getElementById("groupCodeBox").style.display = "block";
+
+  // Gruppe aktivieren
   initGroup(groupId);
 };
 

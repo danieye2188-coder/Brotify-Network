@@ -40,38 +40,34 @@ const PRODUCTS = {
 const loginScreen = document.getElementById("loginScreen");
 const appScreen = document.getElementById("appScreen");
 
-function genCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
-document.getElementById("createGroupBtn").onclick = () => {
+createGroupBtn.onclick = () => {
   const name = userName.value.trim();
   if (!name) return alert("Name eingeben");
 
-  const gid = genCode();
-  db.ref("groups/" + gid).set({ created: Date.now() });
+  const groupRef = db.ref("groups").push();
+  currentGroup = groupRef.key;
 
-  enterGroup(gid, name);
+  groupRef.set({ created: Date.now() });
+  enterGroup(name);
 };
 
-document.getElementById("joinGroupBtn").onclick = () => {
-  const gid = joinCode.value.trim().toUpperCase();
+joinGroupBtn.onclick = () => {
+  const gid = joinCode.value.trim();
   const name = userName.value.trim();
   if (!gid || !name) return alert("Name & Code eingeben");
 
   db.ref("groups/" + gid).once("value", snap => {
     if (!snap.exists()) return alert("Gruppe nicht gefunden");
-    enterGroup(gid, name);
+    currentGroup = gid;
+    enterGroup(name);
   });
 };
 
-function enterGroup(gid, name) {
-  currentGroup = gid;
+function enterGroup(name) {
   family.value = name;
-  document.getElementById("groupCode").textContent = "🔑 Einladungscode: " + gid;
+  groupCode.textContent = "🔑 Einladungscode: " + currentGroup;
   loginScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
-
   initApp();
 }
 
@@ -80,14 +76,10 @@ const productsEl = document.getElementById("products");
 const overviewEl = document.getElementById("overview");
 const shoppingListEl = document.getElementById("shoppingList");
 const remarkInput = document.getElementById("remark");
-const pickupInline = document.getElementById("pickupInline");
-const pickupInput = document.getElementById("pickupInput");
-const saveBtn = document.getElementById("saveBtn");
 
 /******** ICON PICKER ********/
 function renderIcons(active = selectedIcon) {
-  const picker = document.getElementById("iconPicker");
-  picker.innerHTML = "";
+  iconPicker.innerHTML = "";
   ICONS.forEach(icon => {
     const span = document.createElement("span");
     span.textContent = icon;
@@ -96,7 +88,7 @@ function renderIcons(active = selectedIcon) {
       selectedIcon = icon;
       renderIcons(icon);
     };
-    picker.appendChild(span);
+    iconPicker.appendChild(span);
   });
 }
 
@@ -152,7 +144,7 @@ function renderProducts(items = {}) {
 /******** SPEICHERN ********/
 saveBtn.onclick = () => {
   const name = family.value.trim();
-  if (!name) return alert("Bitte deinen Namen eingeben");
+  if (!name) return alert("Name fehlt");
 
   const data = {
     name,
@@ -162,11 +154,10 @@ saveBtn.onclick = () => {
     time: Date.now()
   };
 
-  const ref = db.ref("groups/" + currentGroup + "/orders");
+  const ref = db.ref(`groups/${currentGroup}/orders`);
   editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
 
   editOrderId = null;
-  saveBtn.textContent = "🛒 Bestellung speichern";
   remarkInput.value = "";
   renderProducts();
 };
@@ -176,10 +167,9 @@ function initApp() {
   renderIcons();
   renderProducts();
 
-  db.ref("groups/" + currentGroup + "/orders").on("value", snap => {
+  db.ref(`groups/${currentGroup}/orders`).on("value", snap => {
     overviewEl.innerHTML = "";
     shoppingListEl.innerHTML = "";
-
     const totals = {};
     const remarks = [];
 
@@ -201,6 +191,16 @@ function initApp() {
         }
       }
 
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "❌ Bestellung löschen";
+      delBtn.className = "delete-btn";
+      delBtn.onclick = () => {
+        if (confirm("Bestellung wirklich löschen?")) {
+          db.ref(`groups/${currentGroup}/orders/${c.key}`).remove();
+        }
+      };
+
+      box.appendChild(delBtn);
       overviewEl.appendChild(box);
     });
 
@@ -221,7 +221,7 @@ function initApp() {
     });
   });
 
-  db.ref("groups/" + currentGroup + "/meta/abholer").on("value", snap => {
+  db.ref(`groups/${currentGroup}/meta/abholer`).on("value", snap => {
     pickupInline.textContent = snap.val()
       ? `🚗💨 Abholer: ${snap.val()}`
       : "🚗💨 kein Abholer";
@@ -230,10 +230,10 @@ function initApp() {
 
 savePickup.onclick = () => {
   const v = pickupInput.value.trim();
-  if (v) db.ref("groups/" + currentGroup + "/meta/abholer").set(v);
+  if (v) db.ref(`groups/${currentGroup}/meta/abholer`).set(v);
   pickupInput.value = "";
 };
 
 clearPickup.onclick = () => {
-  db.ref("groups/" + currentGroup + "/meta/abholer").remove();
+  db.ref(`groups/${currentGroup}/meta/abholer`).remove();
 };

@@ -38,32 +38,39 @@ const PRODUCTS = {
 
 /******** LOGIN ********/
 createGroupBtn.onclick = () => {
-  const name = userName.value.trim();
-  if (!name) return alert("Name eingeben");
+  const groupName = groupNameInput.value.trim();
+  const userNameVal = userName.value.trim();
+  if (!groupName || !userNameVal) return alert("Gruppenname & Name eingeben");
 
   const rawKey = db.ref("groups").push().key;
   const groupCode = rawKey.substring(0, 8).toUpperCase();
   currentGroup = groupCode;
 
-  db.ref("groups/" + groupCode).set({ created: Date.now() });
-  enterGroup(name);
+  db.ref("groups/" + groupCode).set({
+    name: groupName,
+    created: Date.now()
+  });
+
+  enterGroup(groupName, userNameVal);
 };
 
 joinGroupBtn.onclick = () => {
-  const gid = joinCode.value.trim().toUpperCase();
-  const name = userName.value.trim();
-  if (!gid || !name) return alert("Name & Code eingeben");
+  const code = joinCode.value.trim().toUpperCase();
+  const name = joinName.value.trim();
+  if (!code || !name) return alert("Code & Name eingeben");
 
-  db.ref("groups/" + gid).once("value", snap => {
+  db.ref("groups/" + code).once("value", snap => {
     if (!snap.exists()) return alert("Gruppe nicht gefunden");
-    currentGroup = gid;
-    enterGroup(name);
+    currentGroup = code;
+    enterGroup(snap.val().name, name);
   });
 };
 
-function enterGroup(name) {
-  family.value = name;
+function enterGroup(groupName, userNameVal) {
+  groupTitle.textContent = groupName;
   groupCode.textContent = "🔑 Einladungscode: " + currentGroup;
+  family.value = userNameVal;
+
   loginScreen.classList.add("hidden");
   appScreen.classList.remove("hidden");
   initApp();
@@ -156,6 +163,7 @@ saveBtn.onclick = () => {
   editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
 
   editOrderId = null;
+  saveBtn.textContent = "🛒 Bestellung speichern";
   remarkInput.value = "";
   renderProducts();
 };
@@ -173,6 +181,7 @@ function initApp() {
 
     snap.forEach(c => {
       const d = c.val();
+
       const box = document.createElement("div");
       box.className = "overview-box";
       box.innerHTML = `${d.icon} <b>${d.name}</b>`;
@@ -189,8 +198,24 @@ function initApp() {
         }
       }
 
+      /* ✏️ BEARBEITEN */
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "✏️";
+      editBtn.style.float = "right";
+      editBtn.onclick = () => {
+        editOrderId = c.key;
+        family.value = d.name;
+        remarkInput.value = d.remark || "";
+        selectedIcon = d.icon;
+        renderIcons(d.icon);
+        renderProducts(d.items);
+        saveBtn.textContent = "✏️ Bestellung aktualisieren";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      /* ❌ LÖSCHEN */
       const delBtn = document.createElement("button");
-      delBtn.textContent = "❌ Bestellung löschen";
+      delBtn.textContent = "❌";
       delBtn.className = "delete-btn";
       delBtn.onclick = () => {
         if (confirm("Bestellung wirklich löschen?")) {
@@ -198,7 +223,7 @@ function initApp() {
         }
       };
 
-      box.appendChild(delBtn);
+      box.append(editBtn, delBtn);
       overviewEl.appendChild(box);
     });
 

@@ -11,21 +11,22 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN (IMMER SICHTBAR BEIM START) -->
 <div id="loginScreen">
   <h1>Brotify</h1>
+
   <input id="loginUser" placeholder="Benutzername">
   <input id="loginPass" type="password" placeholder="Passwort">
+
   <button id="loginBtn">Anmelden</button>
   <button id="registerBtn">Registrieren</button>
 </div>
 
-<!-- APP -->
+<!-- APP (IMMER VERSTECKT BEIM START) -->
 <div id="appScreen" class="hidden">
 
   <div class="header-moon">
     <h1 id="groupTitle">Keine Gruppe</h1>
-    <p id="groupCode"></p>
   </div>
 
   <input id="groupCodeInput" placeholder="Gruppencode">

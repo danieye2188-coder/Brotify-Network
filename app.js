@@ -37,22 +37,20 @@ const PRODUCTS = {
 };
 
 /******** LOGIN ********/
-const loginScreen = document.getElementById("loginScreen");
-const appScreen = document.getElementById("appScreen");
-
 createGroupBtn.onclick = () => {
   const name = userName.value.trim();
   if (!name) return alert("Name eingeben");
 
-  const groupRef = db.ref("groups").push();
-  currentGroup = groupRef.key;
+  const rawKey = db.ref("groups").push().key;
+  const groupCode = rawKey.substring(0, 8).toUpperCase();
+  currentGroup = groupCode;
 
-  groupRef.set({ created: Date.now() });
+  db.ref("groups/" + groupCode).set({ created: Date.now() });
   enterGroup(name);
 };
 
 joinGroupBtn.onclick = () => {
-  const gid = joinCode.value.trim();
+  const gid = joinCode.value.trim().toUpperCase();
   const name = userName.value.trim();
   if (!gid || !name) return alert("Name & Code eingeben");
 

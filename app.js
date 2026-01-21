@@ -20,7 +20,11 @@ firebase.auth().signInAnonymously();
 firebase.auth().onAuthStateChanged(user => {
   if (!user) return;
   currentUser = user;
-  if (activeGroupId) initGroup(activeGroupId);
+
+  // Warten, bis User sicher da ist
+  if (activeGroupId && !groupRef) {
+    initGroup(activeGroupId);
+  }
 });
 
 /******** GROUP INIT ********/
@@ -276,8 +280,12 @@ document.getElementById("createGroupBtn").onclick = () => {
   document.getElementById("groupCodeBox").style.display = "block";
 
   // Gruppe aktivieren
-  initGroup(groupId);
-};
+ activeGroupId = code;
+localStorage.setItem("activeGroup", code);
+
+if (currentUser) {
+  initGroup(code);
+}
 
 document.getElementById("joinGroupBtn").onclick = () => {
   const code = joinCodeInput.value.trim().toUpperCase();

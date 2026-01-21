@@ -270,6 +270,12 @@ document.getElementById("createGroupBtn").onclick = () => {
 
   const groupId = Math.random().toString(36).substr(2, 6).toUpperCase();
 
+document.getElementById("createGroupBtn").onclick = () => {
+  const name = userNameInput.value.trim();
+  if (!name) return alert("Name fehlt");
+
+  const groupId = Math.random().toString(36).substr(2, 6).toUpperCase();
+
   // Gruppe anlegen
   db.ref("groups/" + groupId).set({
     createdAt: Date.now()
@@ -278,6 +284,11 @@ document.getElementById("createGroupBtn").onclick = () => {
   // Code anzeigen
   document.getElementById("groupCodeValue").textContent = groupId;
   document.getElementById("groupCodeBox").style.display = "block";
+
+  // NUR merken – NICHT starten
+  activeGroupId = groupId;
+  localStorage.setItem("activeGroup", groupId);
+};
 
   // Gruppe aktivieren
  activeGroupId = code;

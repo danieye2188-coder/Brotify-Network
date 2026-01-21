@@ -5,6 +5,7 @@
   <title>Brotify 🍞</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -20,25 +21,28 @@
   <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
 </div>
 
-<!-- 👥 GRUPPENAUSWAHL -->
-<div id="groupScreen" class="hidden">
-  <h2>👥 Deine Gruppen</h2>
-  <div id="groupList"></div>
-  <button id="logoutBtn">🚪 Abmelden</button>
-</div>
-
-<!-- 🛒 APP -->
+<!-- 🛒 APP (ORIGINAL UI) -->
 <div id="appScreen" class="hidden">
 
-  <div class="top-bar">
-    <span id="groupCode"></span>
-    <button id="deleteGroupBtn">🗑 Gruppe löschen</button>
+  <div id="pickupBox">
+    <span>🚗💨</span>
+    <input id="pickupInput" placeholder="Abholer Name">
+    <button id="savePickup">✔</button>
+    <button id="clearPickup">✖</button>
+  </div>
+
+  <div class="header-moon">
+    <h1>Brotify</h1>
+    <p id="groupCode"></p>
   </div>
 
   <input id="family" placeholder="Dein Name">
+  <div id="pickupInline" class="pickup-under">🚗💨 kein Abholer</div>
+
   <div id="iconPicker"></div>
   <div id="products"></div>
-  <textarea id="remark" placeholder="Bemerkung"></textarea>
+
+  <textarea id="remark" placeholder="Bemerkung (z.B. 3 Eier)"></textarea>
   <button id="saveBtn">🛒 Bestellung speichern</button>
 
   <h2>📋 Bestellungen</h2>
@@ -46,6 +50,7 @@
 
   <h2>🧾 Einkaufszettel</h2>
   <div id="shoppingList"></div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>

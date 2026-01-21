@@ -47,7 +47,7 @@ const pickupInline = document.getElementById("pickupInline");
 const pickupInput = document.getElementById("pickupInput");
 const saveBtn = document.getElementById("saveBtn");
 
-/******** LOGIN / GRUPPEN ********/
+/******** LOGIN ********/
 createGroupBtn.onclick = () => {
   const groupName = groupNameInput.value.trim();
   const userNameVal = userName.value.trim();
@@ -56,10 +56,7 @@ createGroupBtn.onclick = () => {
   const ref = db.ref("groups").push();
   currentGroup = ref.key.substring(0, 8).toUpperCase();
 
-  db.ref("groups/" + currentGroup).set({
-    name: groupName,
-    created: Date.now()
-  });
+  db.ref("groups/" + currentGroup).set({ name: groupName });
 
   saveSession(groupName, userNameVal);
   enterGroup(groupName, userNameVal);
@@ -78,7 +75,7 @@ joinGroupBtn.onclick = () => {
   });
 };
 
-/******** SESSION (MERKEN, NICHT BINDEN) ********/
+/******** SESSION ********/
 function saveSession(groupName, userName) {
   localStorage.setItem("brotifyGroup", currentGroup);
   localStorage.setItem("brotifyGroupName", groupName);
@@ -89,7 +86,6 @@ function loadSession() {
   const g = localStorage.getItem("brotifyGroup");
   const gn = localStorage.getItem("brotifyGroupName");
   const u = localStorage.getItem("brotifyUserName");
-
   if (g && gn && u) {
     currentGroup = g;
     enterGroup(gn, u);
@@ -103,12 +99,10 @@ leaveGroupBtn.onclick = () => {
   location.reload();
 };
 
-/******** ENTER GROUP ********/
+/******** ENTER ********/
 function enterGroup(groupName, userNameVal) {
-  document.getElementById("groupTitle").textContent = groupName;
-  document.getElementById("groupCode").textContent =
-    "🔑 Einladungscode: " + currentGroup;
-
+  groupTitle.textContent = groupName;
+  groupCode.textContent = "🔑 Einladungscode: " + currentGroup;
   nameInput.value = userNameVal;
 
   loginScreen.classList.add("hidden");
@@ -196,10 +190,7 @@ saveBtn.onclick = () => {
   };
 
   const ref = db.ref(`groups/${currentGroup}/orders`);
-
-  editOrderId
-    ? ref.child(editOrderId).set(data)
-    : ref.push(data);
+  editOrderId ? ref.child(editOrderId).set(data) : ref.push(data);
 
   editOrderId = null;
   saveBtn.textContent = "🛒 Bestellung speichern";
@@ -209,7 +200,7 @@ saveBtn.onclick = () => {
   renderProducts();
 };
 
-/******** LIVE ********/
+/******** LIVE – BESTELLUNGEN (ORIGINAL-DARSTELLUNG) ********/
 function initApp() {
   renderIcons();
   renderProducts();
@@ -226,6 +217,7 @@ function initApp() {
 
       const box = document.createElement("div");
       box.className = "overview-box";
+
       box.innerHTML = `${d.icon} <b>${d.name}</b>`;
 
       if (d.remark) {
@@ -305,6 +297,4 @@ document.getElementById("clearPickup").onclick = () => {
 };
 
 /******** AUTO-REJOIN ********/
-window.addEventListener("load", () => {
-  loadSession();
-});
+window.addEventListener("load", loadSession);

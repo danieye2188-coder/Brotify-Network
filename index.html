@@ -1,39 +1,63 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Brotify Network</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brotify 🍞</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <h1>🚀 Brotify Network</h1>
-  <p>Die Website funktioniert!</p>
+<!-- LOGIN / GRUPPE -->
+<div id="loginScreen">
+  <h2>👋 Willkommen bei Brootify</h2>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <input id="userNameInput" placeholder="Dein Name">
 
-    // 🔥 DEINE FIREBASE KONFIGURATION
-    const firebaseConfig = {
-      apiKey: "AIzaSyBXFdU_DmIUl0Oc2wGF2ODAqh7NRWeVBMc",
-      authDomain: "brotify-network.firebaseapp.com",
-      projectId: "brotify-network",
-      storageBucket: "brotify-network.firebasestorage.app",
-      messagingSenderId: "916259400168",
-      appId: "1:916259400168:web:221877f89220e7c6225c5d"
-    };
+  <button id="createGroupBtn">➕ Neue Gruppe erstellen</button>
 
-    // Firebase initialisieren
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  <hr>
 
-    console.log("🔥 Firebase erfolgreich verbunden!");
-  </script>
+  <input id="joinCodeInput" placeholder="Gruppen-Code eingeben">
+  <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
+</div>
 
+<!-- ABHOLER -->
+<div id="pickupBox">
+  <span>🚗💨</span>
+  <input id="pickupInput" placeholder="Abholer Name">
+  <button id="savePickup">✔</button>
+  <button id="clearPickup">✖</button>
+</div>
+
+<div class="header-moon">
+  <h1>Brotify</h1>
+  <p>Gemeinsames Frühstück</p>
+</div>
+
+<input id="family" placeholder="Dein Name">
+<div id="pickupInline" class="pickup-under">🚗💨 kein Abholer</div>
+
+<div id="iconPicker"></div>
+<div id="products"></div>
+
+<textarea id="remark" placeholder="Bemerkung (z.B. 3 Eier)"></textarea>
+
+<button id="saveBtn">🛒 Bestellung speichern</button>
+
+<h2>📋 Bestellungen</h2>
+<div id="overview"></div>
+
+<h2>🧾 Einkaufszettel</h2>
+<div id="shoppingList"></div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,16 +1,16 @@
-/* ===== HINTERGRUNDBILD (EINZIGE ERGÄNZUNG) ===== */
-body {
-  background-image: url("background.jpg");
-  background-size: cover;
-  background-position: center;
-}
-
 /* ===== GRUNDLAYOUT ===== */
 body {
   font-family: 'Nunito', sans-serif;
   max-width: 900px;
   margin: auto;
   padding: 16px;
+
+  /* ✅ EINZIGE ÄNDERUNG: Hintergrundbild */
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 /* 🍊 ORANGENSAFT-GELBE CONTAINER */
@@ -133,6 +133,13 @@ textarea {
   border-radius: 6px;
 }
 
+.remark {
+  background: #e8f0fe;
+  padding: 4px 6px;
+  margin-top: 6px;
+  border-radius: 6px;
+}
+
 .delete-btn {
   width: 100%;
   margin-top: 8px;
@@ -154,11 +161,21 @@ textarea {
   border-bottom: 1px dashed #c58b2b;
 }
 
+.shopping-row .text {
+  line-height: 1.4;
+}
+
+.shopping-row input {
+  justify-self: end;
+}
+
+/* ✅ DURCHSTREICHEN WENN ANGEHAKT */
 .shopping-row:has(input:checked) .text {
   text-decoration: line-through;
   color: #999;
 }
 
+/* 📱 FALLBACK FÜR MOBILE */
 .shopping-row.checked .text {
   text-decoration: line-through;
   color: #999;

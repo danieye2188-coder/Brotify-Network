@@ -1,0 +1,189 @@
+/* ===== LOGIN ===== */
+#loginScreen {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+
+body.logged-in #loginScreen {
+  display: none;
+}
+
+/* ===== GRUNDLAYOUT ===== */
+body {
+  font-family: 'Nunito', sans-serif;
+  max-width: 900px;
+  margin: auto;
+  padding: 16px;
+  background-image: url("background.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+/* 🍊 ORANGENSAFT-GELBE CONTAINER */
+body > *:not(.header-moon) {
+  background: linear-gradient(180deg, #fff1b8, #f9c74f);
+  padding: 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+}
+
+/* ===== HEADER ===== */
+.header-moon {
+  background: #f7e1b5;
+  text-align: center;
+  padding: 30px 20px 40px;
+  border-radius: 0 0 100% 100%;
+}
+
+.header-moon h1 {
+  font-family: 'Pacifico', cursive;
+  font-size: 52px;
+  margin: 0;
+}
+
+.header-moon p {
+  margin-top: 6px;
+}
+
+/* ===== ABHOLER ===== */
+#pickupBox {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+  background: white;
+  padding: 6px;
+  border-radius: 10px;
+  z-index: 999;
+}
+
+.pickup-under {
+  margin-top: 6px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ===== INPUTS ===== */
+input,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 16px;
+  background: white;
+}
+
+#remark {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* ===== ICON PICKER ===== */
+#iconPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.icon {
+  font-size: 26px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.icon.selected {
+  outline: 2px solid #c58b2b;
+  border-radius: 6px;
+}
+
+/* ===== PRODUKTE ===== */
+.product {
+  display: grid;
+  grid-template-columns: 1fr 40px 30px 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+.pm {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+}
+
+.amount {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* ===== HAUPTBUTTON ===== */
+#saveBtn {
+  width: 100%;
+  padding: 16px;
+  font-size: 20px;
+  font-weight: bold;
+  background: #fff7e6;
+  border: 4px solid #c58b2b;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+/* ===== BESTELLÜBERSICHT ===== */
+.overview-box {
+  background: rgba(255,255,255,0.95);
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+}
+
+.remark {
+  background: #e8f0fe;
+  padding: 4px 6px;
+  margin-top: 6px;
+  border-radius: 6px;
+}
+
+.delete-btn {
+  width: 100%;
+  margin-top: 8px;
+  background: #d9534f;
+  color: white;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ===== EINKAUFSZETTEL ===== */
+.shopping-row {
+  display: grid;
+  grid-template-columns: 1fr 28px;
+  align-items: center;
+  column-gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #c58b2b;
+}
+
+.shopping-row .text {
+  line-height: 1.4;
+}
+
+.shopping-row input {
+  justify-self: end;
+}
+
+/* Durchstreichen */
+.shopping-row:has(input:checked) .text {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.shopping-row.checked .text {
+  text-decoration: line-through;
+  color: #999;
+}

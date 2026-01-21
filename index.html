@@ -19,36 +19,28 @@
   <button id="loginBtn">🔐 Anmelden</button>
   <button id="registerBtn">🆕 Neu registrieren</button>
 
-  <hr>
-
-  <input id="groupNameInput" placeholder="Gruppenname (neu)">
-  <button id="createGroupBtn">➕ Gruppe erstellen</button>
-
-  <input id="joinCode" placeholder="Einladungscode">
-  <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
+  <input id="loginJoinCode" placeholder="Gruppe beitreten (Code optional)">
 </div>
 
 <!-- APP -->
 <div id="appScreen" class="hidden">
 
-  <button id="logoutBtn" style="width:100%;margin-bottom:10px;">
-    🚪 Logout
-  </button>
+  <button id="logoutBtn" style="width:100%;margin-bottom:10px;">🚪 Logout</button>
 
-  <button id="leaveGroupBtn" style="width:100%;margin-bottom:10px;">
-    🚪 Gruppe verlassen
-  </button>
+  <!-- NEU: GRUPPENSTEUERUNG -->
+  <button id="createGroupBtn" style="width:100%;margin-bottom:6px;">➕ Gruppe erstellen</button>
+  <button id="joinGroupBtn" style="width:100%;margin-bottom:10px;">🔑 Gruppe beitreten</button>
+
+  <div class="header-moon">
+    <h1 id="groupTitle">Keine Gruppe</h1>
+    <p id="groupCode"></p>
+  </div>
 
   <div id="pickupBox">
     <span>🚗💨</span>
     <input id="pickupInput" placeholder="Abholer Name">
     <button id="savePickup">✔</button>
     <button id="clearPickup">✖</button>
-  </div>
-
-  <div class="header-moon">
-    <h1 id="groupTitle">Brotify</h1>
-    <p id="groupCode"></p>
   </div>
 
   <input id="family" placeholder="Dein Name" disabled>

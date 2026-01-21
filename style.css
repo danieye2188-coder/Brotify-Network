@@ -1,6 +1,4 @@
-/* =====================================================
-   ===== GRUNDLAYOUT =====
-   ===================================================== */
+/* ===== GRUNDLAYOUT ===== */
 body {
   font-family: 'Nunito', sans-serif;
   max-width: 900px;
@@ -14,16 +12,14 @@ body {
 }
 
 /* 🍊 ORANGENSAFT-GELBE CONTAINER */
-body > * {
+body > *:not(.header-moon) {
   background: linear-gradient(180deg, #fff1b8, #f9c74f);
   padding: 14px;
   margin-bottom: 14px;
   border-radius: 12px;
 }
 
-/* =====================================================
-   ===== HEADER =====
-   ===================================================== */
+/* ===== HEADER ===== */
 .header-moon {
   background: #f7e1b5;
   text-align: center;
@@ -41,9 +37,7 @@ body > * {
   margin-top: 6px;
 }
 
-/* =====================================================
-   ===== ABHOLER =====
-   ===================================================== */
+/* ===== ABHOLER ===== */
 #pickupBox {
   position: fixed;
   top: 10px;
@@ -62,9 +56,7 @@ body > * {
   font-size: 14px;
 }
 
-/* =====================================================
-   ===== INPUTS =====
-   ===================================================== */
+/* ===== INPUTS ===== */
 input,
 textarea {
   width: 100%;
@@ -82,9 +74,7 @@ textarea {
   resize: vertical;
 }
 
-/* =====================================================
-   ===== ICON PICKER =====
-   ===================================================== */
+/* ===== ICON PICKER ===== */
 #iconPicker {
   display: flex;
   flex-wrap: wrap;
@@ -102,24 +92,20 @@ textarea {
   border-radius: 6px;
 }
 
-/* =====================================================
-   🔥 PRODUKTE – STABILES GRID (FINAL)
-   ===================================================== */
+/* =========================================================
+   🔥 PRODUKTE – HARTER FIX (DAS IST DIE LÖSUNG)
+   ========================================================= */
 .product {
-  display: grid;
-  grid-template-columns: 1fr 40px 30px 40px;
-  gap: 8px;
-  align-items: center;
+  display: grid !important;
+  grid-template-columns: 1fr 40px 30px 40px !important;
+  gap: 8px !important;
+  align-items: center !important;
 }
 
-/* Produktname */
-.product > div:first-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.product > div {
   white-space: nowrap;
 }
 
-/* +/- Buttons */
 .pm {
   width: 40px;
   height: 40px;
@@ -129,15 +115,12 @@ textarea {
   justify-content: center;
 }
 
-/* Menge */
 .amount {
   text-align: center;
   font-weight: bold;
 }
 
-/* =====================================================
-   ===== HAUPTBUTTON =====
-   ===================================================== */
+/* ===== HAUPTBUTTON ===== */
 #saveBtn {
   width: 100%;
   padding: 16px;
@@ -149,9 +132,7 @@ textarea {
   cursor: pointer;
 }
 
-/* =====================================================
-   ===== BESTELLÜBERSICHT =====
-   ===================================================== */
+/* ===== BESTELLÜBERSICHT ===== */
 .overview-box {
   background: rgba(255,255,255,0.95);
   padding: 10px;
@@ -177,9 +158,7 @@ textarea {
   cursor: pointer;
 }
 
-/* =====================================================
-   ===== EINKAUFSZETTEL =====
-   ===================================================== */
+/* ===== EINKAUFSZETTEL ===== */
 .shopping-row {
   display: grid;
   grid-template-columns: 1fr 28px;
@@ -197,16 +176,17 @@ textarea {
   justify-self: end;
 }
 
-/* Durchstreichen */
-.shopping-row:has(input:checked) .text,
+.shopping-row:has(input:checked) .text {
+  text-decoration: line-through;
+  color: #999;
+}
+
 .shopping-row.checked .text {
   text-decoration: line-through;
   color: #999;
 }
 
-/* =====================================================
-   ===== HELFER =====
-   ===================================================== */
+/* ===== HELFER ===== */
 .hidden {
   display: none;
 }

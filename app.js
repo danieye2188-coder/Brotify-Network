@@ -15,9 +15,9 @@ const loginPass   = document.getElementById("loginPass");
 const loginBtn    = document.getElementById("loginBtn");
 const registerBtn = document.getElementById("registerBtn");
 
-const groupTitle      = document.getElementById("groupTitle");
-const groupCodeInput  = document.getElementById("groupCodeInput");
-const joinGroupBtn    = document.getElementById("joinGroupBtn");
+const groupTitle     = document.getElementById("groupTitle");
+const groupCodeInput = document.getElementById("groupCodeInput");
+const joinGroupBtn   = document.getElementById("joinGroupBtn");
 
 const productsEl = document.getElementById("products");
 const saveBtn    = document.getElementById("saveBtn");
@@ -27,16 +27,16 @@ const overviewEl = document.getElementById("overview");
 let currentUser  = null;
 let currentGroup = null;
 let cart = {};
-let ordersListener = null;
+let ordersRef = null;
 
-/******** HASH (Passwort) ********/
+/******** HASH ********/
 async function hash(text) {
   const buf = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(text)
   );
   return Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2, "0"))
+    .map(b => b.toString(16).padStart(2,"0"))
     .join("");
 }
 
@@ -77,13 +77,11 @@ registerBtn.onclick = async () => {
 function startSession(u) {
   currentUser = u;
 
-  loginScreen.style.display = "none";
-  appScreen.style.display = "block";
+  loginScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
 
   const g = localStorage.getItem("group");
-  if (g) {
-    joinGroup(g);
-  }
+  if (g) joinGroup(g);
 }
 
 /******** AUTOLOGIN ********/
@@ -115,9 +113,7 @@ function renderProducts() {
   productsEl.innerHTML = "";
   cart = {};
 
-  const products = ["Brezel", "Brötchen", "Croissant"];
-
-  products.forEach(p => {
+  ["Brezel","Brötchen","Croissant"].forEach(p => {
     cart[p] = 0;
 
     const row = document.createElement("div");
@@ -130,9 +126,9 @@ function renderProducts() {
     minus.textContent = "−";
     minus.className = "pm";
 
-    const amount = document.createElement("div");
-    amount.textContent = "0";
-    amount.className = "amount";
+    const amt = document.createElement("div");
+    amt.className = "amount";
+    amt.textContent = "0";
 
     const plus = document.createElement("button");
     plus.textContent = "+";
@@ -141,16 +137,16 @@ function renderProducts() {
     minus.onclick = () => {
       if (cart[p] > 0) {
         cart[p]--;
-        amount.textContent = cart[p];
+        amt.textContent = cart[p];
       }
     };
 
     plus.onclick = () => {
       cart[p]++;
-      amount.textContent = cart[p];
+      amt.textContent = cart[p];
     };
 
-    row.append(name, minus, amount, plus);
+    row.append(name, minus, amt, plus);
     productsEl.appendChild(row);
   });
 }
@@ -167,15 +163,12 @@ saveBtn.onclick = () => {
   });
 };
 
-/******** LIVE BESTELLUNGEN ********/
+/******** LIVE ********/
 function startOrdersListener() {
-  // alten Listener entfernen (wichtig!)
-  if (ordersListener) {
-    ordersListener.off();
-  }
+  if (ordersRef) ordersRef.off();
 
-  ordersListener = db.ref(`groups/${currentGroup}/orders`);
-  ordersListener.on("value", snap => {
+  ordersRef = db.ref(`groups/${currentGroup}/orders`);
+  ordersRef.on("value", snap => {
     overviewEl.innerHTML = "";
 
     snap.forEach(c => {

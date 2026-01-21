@@ -12,10 +12,15 @@
 <!-- LOGIN -->
 <div id="loginScreen">
   <h1>🍞 Brotify</h1>
-  <input id="userName" placeholder="Dein Name">
+
+  <input id="groupNameInput" placeholder="Gruppenname (z.B. Freitagsfrühstück)">
+  <input id="userName" placeholder="Dein Name (z.B. Herr Mayer)">
   <button id="createGroupBtn">➕ Gruppe erstellen</button>
+
   <hr>
-  <input id="joinCode" placeholder="Einladungscode (z.B. A9F3KQ2Z)">
+
+  <input id="joinCode" placeholder="Einladungscode">
+  <input id="joinName" placeholder="Dein Name">
   <button id="joinGroupBtn">🔑 Gruppe beitreten</button>
 </div>
 
@@ -30,7 +35,7 @@
   </div>
 
   <div class="header-moon">
-    <h1>Brotify</h1>
+    <h1 id="groupTitle">Brotify</h1>
     <p id="groupCode"></p>
   </div>
 

@@ -190,3 +190,16 @@ textarea {
 .hidden {
   display: none;
 }
+.product {
+  display: grid;
+  grid-template-columns: 1fr 40px 30px 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+/* 🔧 FIX für lange Produktnamen */
+.product > div:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -15,9 +15,9 @@ const loginPass   = document.getElementById("loginPass");
 const loginBtn    = document.getElementById("loginBtn");
 const registerBtn = document.getElementById("registerBtn");
 
-const groupTitle  = document.getElementById("groupTitle");
-const groupCodeInput = document.getElementById("groupCodeInput");
-const joinGroupBtn   = document.getElementById("joinGroupBtn");
+const groupTitle      = document.getElementById("groupTitle");
+const groupCodeInput  = document.getElementById("groupCodeInput");
+const joinGroupBtn    = document.getElementById("joinGroupBtn");
 
 const productsEl = document.getElementById("products");
 const saveBtn    = document.getElementById("saveBtn");
@@ -27,15 +27,16 @@ const overviewEl = document.getElementById("overview");
 let currentUser  = null;
 let currentGroup = null;
 let cart = {};
+let ordersListener = null;
 
-/******** HASH ********/
+/******** HASH (Passwort) ********/
 async function hash(text) {
   const buf = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(text)
   );
   return Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2,"0"))
+    .map(b => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
@@ -47,6 +48,7 @@ loginBtn.onclick = async () => {
 
   const h = await hash(p);
   const snap = await db.ref("users/" + u).get();
+
   if (!snap.exists()) return alert("User existiert nicht");
   if (snap.val().password !== h) return alert("Falsches Passwort");
 
@@ -61,9 +63,12 @@ registerBtn.onclick = async () => {
 
   const h = await hash(p);
   const ref = db.ref("users/" + u);
-  if ((await ref.get()).exists()) return alert("User existiert schon");
 
-  await ref.set({ password: h });
+  if ((await ref.get()).exists()) {
+    return alert("User existiert schon");
+  }
+
+  await ref.set({ password: h, created: Date.now() });
   localStorage.setItem("user", u);
   startSession(u);
 };
@@ -71,30 +76,38 @@ registerBtn.onclick = async () => {
 /******** SESSION ********/
 function startSession(u) {
   currentUser = u;
+
   loginScreen.style.display = "none";
   appScreen.style.display = "block";
 
   const g = localStorage.getItem("group");
-  if (g) joinGroup(g);
+  if (g) {
+    joinGroup(g);
+  }
 }
 
 /******** AUTOLOGIN ********/
 const savedUser = localStorage.getItem("user");
-if (savedUser) startSession(savedUser);
+if (savedUser) {
+  startSession(savedUser);
+}
 
-/******** GRUPPE ********/
+/******** GRUPPEN ********/
 joinGroupBtn.onclick = () => {
-  joinGroup(groupCodeInput.value.trim());
+  const code = groupCodeInput.value.trim();
+  joinGroup(code);
 };
 
 function joinGroup(code) {
   if (!code) return alert("Code eingeben");
+
   currentGroup = code;
   localStorage.setItem("group", code);
 
   groupTitle.textContent = "Gruppe: " + code;
+
   renderProducts();
-  listenOrders();
+  startOrdersListener();
 }
 
 /******** PRODUKTE ********/
@@ -102,18 +115,28 @@ function renderProducts() {
   productsEl.innerHTML = "";
   cart = {};
 
-  ["Brezel","Brötchen","Croissant"].forEach(p => {
+  const products = ["Brezel", "Brötchen", "Croissant"];
+
+  products.forEach(p => {
     cart[p] = 0;
 
     const row = document.createElement("div");
-    row.innerHTML = `
-      ${p}
-      <button>-</button>
-      <span>0</span>
-      <button>+</button>
-    `;
+    row.className = "product";
 
-    const [ , minus, amount, plus ] = row.children;
+    const name = document.createElement("div");
+    name.textContent = p;
+
+    const minus = document.createElement("button");
+    minus.textContent = "−";
+    minus.className = "pm";
+
+    const amount = document.createElement("div");
+    amount.textContent = "0";
+    amount.className = "amount";
+
+    const plus = document.createElement("button");
+    plus.textContent = "+";
+    plus.className = "pm";
 
     minus.onclick = () => {
       if (cart[p] > 0) {
@@ -127,6 +150,7 @@ function renderProducts() {
       amount.textContent = cart[p];
     };
 
+    row.append(name, minus, amount, plus);
     productsEl.appendChild(row);
   });
 }
@@ -134,6 +158,8 @@ function renderProducts() {
 /******** SPEICHERN ********/
 saveBtn.onclick = () => {
   if (!currentGroup) return alert("Keine Gruppe");
+  if (!currentUser) return alert("Nicht eingeloggt");
+
   db.ref(`groups/${currentGroup}/orders`).push({
     user: currentUser,
     items: cart,
@@ -141,14 +167,24 @@ saveBtn.onclick = () => {
   });
 };
 
-/******** LIVE ********/
-function listenOrders() {
-  db.ref(`groups/${currentGroup}/orders`).on("value", snap => {
+/******** LIVE BESTELLUNGEN ********/
+function startOrdersListener() {
+  // alten Listener entfernen (wichtig!)
+  if (ordersListener) {
+    ordersListener.off();
+  }
+
+  ordersListener = db.ref(`groups/${currentGroup}/orders`);
+  ordersListener.on("value", snap => {
     overviewEl.innerHTML = "";
+
     snap.forEach(c => {
       const d = c.val();
-      overviewEl.innerHTML +=
-        `<div><b>${d.user}</b>: ${JSON.stringify(d.items)}</div>`;
+      overviewEl.innerHTML += `
+        <div class="overview-box">
+          <b>${d.user}</b>: ${JSON.stringify(d.items)}
+        </div>
+      `;
     });
   });
 }
